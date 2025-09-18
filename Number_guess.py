@@ -2,6 +2,8 @@ import random as rnd
 import os
 import time
 
+max_guesses = 6
+
 def number_guess():
     number = rnd.randint(1, 100)
     count = 0
@@ -9,6 +11,10 @@ def number_guess():
     while True:
         guess = input("Guess a number between 1 and 100: ")
         guess = int(guess)
+
+        if count > max_guesses:
+            print("Too bad, you failed")
+            break
 
         if guess > number:
             print("Guess lower!")
