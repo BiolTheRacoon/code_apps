@@ -7,7 +7,7 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog
 
-# Stage 2: Added read functionality for JSON and CSV
+# Stage 3: Modular functions, full CSV/JSON/TXT support, editor switching
 
 BASE_PATH = Path.home() / "PycharmProjects" / "test_file" / "texts"
 BASE_PATH.mkdir(parents=True, exist_ok=True)
@@ -45,6 +45,12 @@ def open_with_editor(filepath, editor):
     except Exception as e:
         print(f"Error opening file with {editor}: {e}")
 
+def create_file(filename, content):
+    file_path = BASE_PATH / filename
+    with file_path.open("w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"File '{filename}' created successfully!")
+
 def read_file(file_path):
     ext = file_path.suffix.lower()
     if ext == ".json":
@@ -60,10 +66,22 @@ def read_file(file_path):
         with file_path.open("r", encoding="utf-8") as f:
             print(f.read())
 
+def delete_file(filename):
+    file_path = BASE_PATH / filename
+    if file_path.exists():
+        confirm = input(f"Delete '{filename}'? [y/N] > ").strip().lower()
+        if confirm == "y":
+            file_path.unlink()
+            print(f"File '{filename}' deleted.")
+        else:
+            print("Delete canceled.")
+    else:
+        print("File not found.")
+
 preferred_editor = load_preferred_editor()
 
 while True:
-    action = input("Action: [open], [create], [delete], [read], [quit] > ").strip().lower()
+    action = input("Action: [open], [create], [delete], [read], [change editor], [quit] > ").strip().lower()
     if action == "open":
         root = tk.Tk()
         root.withdraw()
@@ -72,17 +90,12 @@ while True:
         if filepath:
             open_with_editor(Path(filepath), preferred_editor)
     elif action == "create":
-        filename = input("Enter new filename: ").strip()
+        filename = input("Enter filename: ").strip()
         content = input("Enter file content: ")
-        with (BASE_PATH / filename).open("w", encoding="utf-8") as f:
-            f.write(content)
-        print(f"File '{filename}' created.")
+        create_file(filename, content)
     elif action == "delete":
-        filename = input("Enter filename to delete: ").strip()
-        file_path = BASE_PATH / filename
-        if file_path.exists():
-            file_path.unlink()
-            print(f"File '{filename}' deleted.")
+        filename = input("Enter filename: ").strip()
+        delete_file(filename)
     elif action == "read":
         filename = input("Enter filename to read: ").strip()
         file_path = BASE_PATH / filename
@@ -90,5 +103,8 @@ while True:
             read_file(file_path)
         else:
             print("File not found.")
+    elif action == "change editor":
+        preferred_editor = pick_editor()
     elif action == "quit":
+        print("Goodbye!")
         break
